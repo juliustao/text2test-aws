@@ -48,16 +48,26 @@ def split_into_sentences(text):
 
 
 def lambda_handler(event, context):
+    response = {
+        "statusCode": 200,
+        "headers": {
+            "test_header": "test_value"
+        },
+        "body": "No questions generated.",
+        "isBase64Encoded": False,
+        "event": event,
+    }
+
     results = []
 
-    input_text = event['inputTranscript']
+    input_text = event["inputTranscript"]
     list_of_input_sentences = split_into_sentences(input_text)
 
     list_of_entities_in_sentences = client.batch_detect_entities(TextList=list_of_input_sentences, LanguageCode='en')['ResultList']
     # type(sentence_entities_list): list of dictionaries
 
     if len(list_of_input_sentences) != len(list_of_entities_in_sentences):
-        return results
+        return response
 
     for i in range(len(list_of_entities_in_sentences)):
         # type(sentence_entities): dictionary
@@ -101,5 +111,6 @@ def lambda_handler(event, context):
                 'score': score,
             }
             results.append(result)
+        response['body'] = results
 
-    return results
+    return response
